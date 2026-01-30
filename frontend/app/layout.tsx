@@ -5,6 +5,9 @@ import Toaster from '@/components/Toaster'
 export const metadata: Metadata = {
   title: 'SiegerTech - Buy, Sell & Trade Crypto and Gift Cards',
   description: 'Secure crypto and gift card trading platform',
+  icons: {
+    icon: '/favicon.png',
+  },
 }
 
 export const viewport: Viewport = {
