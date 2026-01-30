@@ -60,7 +60,7 @@ export default function GiftCardsPage() {
       });
       toast.success('Purchase order created');
       setShowBuyModal(false);
-      setFormData({ faceValue: '', giftCardCode: '' });
+      setFormData({ faceValue: '', giftCardCode: '', redeemCode: '' });
       fetchTrades();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Purchase failed');
@@ -84,7 +84,7 @@ export default function GiftCardsPage() {
       });
       toast.success('Sell order created');
       setShowSellModal(false);
-      setFormData({ faceValue: '', giftCardCode: '' });
+      setFormData({ faceValue: '', giftCardCode: '', redeemCode: '' });
       fetchTrades();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Sell failed');
@@ -362,7 +362,7 @@ export default function GiftCardsPage() {
                     type="button"
                     onClick={() => {
                       setShowBuyModal(false);
-                      setFormData({ faceValue: '', giftCardCode: '' });
+                      setFormData({ faceValue: '', giftCardCode: '', redeemCode: '' });
                     }}
                     className="btn-secondary flex-1"
                   >
@@ -428,7 +428,7 @@ export default function GiftCardsPage() {
                     type="button"
                     onClick={() => {
                       setShowSellModal(false);
-                      setFormData({ faceValue: '', giftCardCode: '' });
+                      setFormData({ faceValue: '', giftCardCode: '', redeemCode: '' });
                     }}
                     className="btn-primary flex-1"
                   >
