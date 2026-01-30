@@ -1,0 +1,43 @@
+{
+  "name": "vickyexchange",
+  "version": "1.0.0",
+  "description": "Crypto and Gift Card Trading Platform",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "build": "cd frontend && npm run build",
+    "start": "NODE_ENV=production node server.js",
+    "start:dev": "nodemon server.js",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && npm run seed",
+    "create-admin": "node backend/scripts/create-admin.js",
+    "setup": "node scripts/setup.js",
+    "check-mongodb": "node scripts/start-mongodb.js",
+    "clear-cache": "cd frontend && if exist .next rmdir /s /q .next && echo Cache cleared! || echo Cache already cleared"
+  },
+  "keywords": ["crypto", "exchange", "trading", "gift-cards"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "express-validator": "^7.0.1",
+    "express-rate-limit": "^7.1.5",
+    "multer": "^1.4.5-lts.1",
+    "cloudinary": "^1.41.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3"
+  }
+}
