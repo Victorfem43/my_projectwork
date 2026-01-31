@@ -22,7 +22,8 @@ async function fetchLiveMarkets(perPage = 30, withSparkline = true) {
       sparkline: withSparkline,
       price_change_percentage: '24h',
     },
-    timeout: 10000,
+    timeout: 15000,
+    headers: { 'Accept': 'application/json' },
   });
   return (data || []).map((c) => ({
     id: c.id,
@@ -149,9 +150,24 @@ router.post('/buy', protect, [
       });
     }
 
-    const { symbol, amount } = req.body;
-    const sym = (symbol || '').toUpperCase();
-    const livePrice = await getLivePrice(sym);
+    const symbol = (req.body.symbol || '').trim();
+    const amount = parseFloat(req.body.amount, 10);
+    if (!Number.isFinite(amount) || amount < 0.0001) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
+    }
+
+    const sym = symbol.toUpperCase();
+    let livePrice;
+    try {
+      livePrice = await getLivePrice(sym);
+    } catch (apiErr) {
+      console.error('Crypto buy getLivePrice error:', apiErr.message);
+      return res.status(503).json({
+        success: false,
+        message: 'Price service temporarily unavailable. Please try again in a moment.',
+      });
+    }
+
     if (livePrice == null || livePrice <= 0) {
       return res.status(404).json({ success: false, message: 'Crypto not found or not supported. Use a symbol from the live market.' });
     }
@@ -164,7 +180,7 @@ router.post('/buy', protect, [
     }
 
     // Check USD balance
-    if ((wallet.balances.usd || 0) < totalCost) {
+    if ((wallet.balances?.usd ?? 0) < totalCost) {
       return res.status(400).json({ success: false, message: 'Insufficient balance' });
     }
 
@@ -186,7 +202,11 @@ router.post('/buy', protect, [
       message: 'Buy order created'
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Crypto buy error:', error.message, error.stack);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create buy order',
+    });
   }
 });
 
@@ -208,8 +228,13 @@ router.post('/sell', protect, [
       });
     }
 
-    const { symbol, amount } = req.body;
-    const sym = (symbol || '').toUpperCase();
+    const symbol = (req.body.symbol || '').trim();
+    const amount = parseFloat(req.body.amount, 10);
+    if (!Number.isFinite(amount) || amount < 0.0001) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
+    }
+
+    const sym = symbol.toUpperCase();
     const symbolLower = symbol.toLowerCase();
     let wallet = await Wallet.findOne({ user: req.user.id });
 
@@ -218,11 +243,21 @@ router.post('/sell', protect, [
     }
 
     // Check crypto balance
-    if ((wallet.balances[symbolLower] || 0) < amount) {
+    if ((wallet.balances?.[symbolLower] ?? 0) < amount) {
       return res.status(400).json({ success: false, message: 'Insufficient balance' });
     }
 
-    const livePrice = await getLivePrice(sym);
+    let livePrice;
+    try {
+      livePrice = await getLivePrice(sym);
+    } catch (apiErr) {
+      console.error('Crypto sell getLivePrice error:', apiErr.message);
+      return res.status(503).json({
+        success: false,
+        message: 'Price service temporarily unavailable. Please try again in a moment.',
+      });
+    }
+
     if (livePrice == null || livePrice <= 0) {
       return res.status(404).json({ success: false, message: 'Crypto not found or not supported. Use a symbol from the live market.' });
     }
@@ -247,7 +282,11 @@ router.post('/sell', protect, [
       message: 'Sell order created'
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Crypto sell error:', error.message, error.stack);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to create sell order',
+    });
   }
 });
 
