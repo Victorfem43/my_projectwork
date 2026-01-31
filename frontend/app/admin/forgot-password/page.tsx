@@ -93,7 +93,7 @@ export default function AdminForgotPasswordPage() {
                     </Link>
                   </div>
                 )}
-                <Link href="/admin/login" className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors">
+                <Link href="/admin" className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-300 transition-colors">
                   <ArrowLeft className="w-4 h-4" />
                   Back to Admin Login
                 </Link>
@@ -103,7 +103,7 @@ export default function AdminForgotPasswordPage() {
             <div className="mt-8 pt-8 border-t border-white/10">
               <p className="text-center text-gray-400 text-sm">
                 Remember your password?{' '}
-                <Link href="/admin/login" className="text-yellow-400 hover:text-yellow-300 font-medium transition-colors">
+                <Link href="/admin" className="text-yellow-400 hover:text-yellow-300 font-medium transition-colors">
                   Sign in
                 </Link>
               </p>

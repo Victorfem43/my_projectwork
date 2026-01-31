@@ -27,7 +27,7 @@ api.interceptors.request.use((config) => {
 });
 
 // Handle 401: don't redirect on login failure (stay on page to show "Invalid credentials")
-// When redirecting, keep admin flow on /admin/login, never send to user /login
+// When redirecting, keep admin flow on /admin, never send to user /login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -45,9 +45,9 @@ api.interceptors.response.use(
 
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    // Never send admin flow to user /login – always use /admin/login
-    const goToAdminLogin = onAdminPage || isAdminRequest;
-    window.location.href = goToAdminLogin ? '/admin/login' : '/login';
+    // Never send admin flow to user /login – always use /admin
+    const goToAdmin = onAdminPage || isAdminRequest;
+    window.location.href = goToAdmin ? '/admin' : '/login';
     return Promise.reject(error);
   }
 );

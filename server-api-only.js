@@ -45,7 +45,7 @@ const connectDB = async () => {
 expressApp.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
-    message: 'VICKYEXCHANGE API',
+    message: 'SiegerTech API',
     dbConnected: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString(),
   });

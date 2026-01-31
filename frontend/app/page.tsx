@@ -120,7 +120,7 @@ export default function Home() {
       <section className="section bg-gradient-to-b from-transparent to-white/5">
         <div className="container-custom">
           <div className="text-center mb-16">
-            <h2 className="heading-2 text-white mb-4">Why Choose VICKYEXCHANGE</h2>
+            <h2 className="heading-2 text-white mb-4">Why Choose SiegerTech</h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Built for traders who demand the best in security, speed, and reliability
             </p>

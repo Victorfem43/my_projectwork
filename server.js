@@ -82,7 +82,7 @@ expressApp.get('/api/health', (req, res) => {
   console.log('✅ Health check endpoint hit:', req.method, req.path);
   res.json({ 
     status: 'OK', 
-    message: 'VICKYEXCHANGE API is running',
+    message: 'SiegerTech API is running',
     dbConnected: mongoose.connection.readyState === 1,
     timestamp: new Date().toISOString()
   });

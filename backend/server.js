@@ -46,7 +46,7 @@ app.get('/api/health', (req, res) => {
     : null;
   res.json({
     status: 'OK',
-    message: 'VICKYEXCHANGE API',
+    message: 'SiegerTech API',
     dbConnected,
     databaseName,
     timestamp: new Date().toISOString(),

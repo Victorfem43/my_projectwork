@@ -13,26 +13,25 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // Allow /admin/login and /admin/forgot-password without redirect
-    if (pathname === '/admin/login' || pathname === '/admin/forgot-password') {
+    // Allow /admin (exact) and /admin/forgot-password – no redirect (login or form at /admin)
+    if (pathname === '/admin' || pathname === '/admin/forgot-password') {
       return;
     }
 
-    // Not logged in → admin login (stay in admin flow)
+    // Other /admin/* require auth and admin
     if (!isAuthenticated()) {
-      router.push('/admin/login');
+      router.push('/admin');
       return;
     }
-
-    // Logged in but not admin → admin login with message (do not send to user dashboard)
     if (!isAdmin()) {
-      router.push('/admin/login?reason=admin_required');
+      router.push('/admin?reason=admin_required');
       return;
     }
   }, [router, pathname]);
 
-  // Show loading while checking auth
-  if (pathname !== '/admin/login' && pathname !== '/admin/forgot-password' && (!isAuthenticated() || !isAdmin())) {
+  // Show loading only for protected /admin/* (not for /admin or /admin/forgot-password)
+  const isPublicPath = pathname === '/admin' || pathname === '/admin/forgot-password';
+  if (!isPublicPath && (!isAuthenticated() || !isAdmin())) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
