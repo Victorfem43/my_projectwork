@@ -55,9 +55,30 @@ curl https://YOUR-RAILWAY-URL/api/health
 
 You should see something like: `{"status":"OK","message":"VICKYEXCHANGE API",...}`.
 
-### 5. (Optional) Create admin user on the deployed API
+### 5. Create admin user in the production database (required for admin login)
 
-Your backend uses the same code and DB. If your `MONGODB_URI` on Railway points to the same database you use locally (e.g. Atlas), the admin you created with `npm run create-admin` already exists. If this is a **new** database, run the create-admin script **once** against the production DB (e.g. set `MONGODB_URI` locally to the Atlas URI, run `npm run create-admin`, then switch back), or add a one-off script/step that runs in Railway to create the admin.
+The 401 "Invalid credentials" on admin login usually means **no admin user exists in the database Railway uses**. Create it once:
+
+1. **Get the production MongoDB URI**  
+   In Railway: your backend service → **Variables** → copy `MONGODB_URI` (e.g. from MongoDB Atlas).
+
+2. **Run the create-admin script against that database** (from your project root):
+   ```bash
+   # Windows (PowerShell)
+   $env:MONGODB_URI="mongodb+srv://user:pass@cluster.mongodb.net/yourdb"
+   node backend/scripts/create-admin.js
+
+   # Or use backend/.env: put MONGODB_URI=your_production_uri in backend/.env, then:
+   cd backend
+   node scripts/create-admin.js
+   ```
+   Use the **exact same** `MONGODB_URI` as in Railway. The script creates/updates the admin user in that DB.
+
+3. **Admin credentials** (from the script):
+   - Email: `victorfem7@gmail.com`
+   - Password: `20262026`
+
+4. Log in at your site’s `/admin/login` with those credentials. If your Railway DB is the same as local (e.g. same Atlas URI), the admin you created locally is already there; if Railway uses a **new/empty** DB, you must run the script once with that DB’s URI.
 
 ---
 

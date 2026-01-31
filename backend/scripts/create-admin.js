@@ -7,7 +7,7 @@ dotenv.config();
 
 const createAdmin = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vickyexchange');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://victorfem7_db_user:Victorfem21@cluster0.vhldqzk.mongodb.net/?appName=Cluster0');
     console.log('✅ MongoDB Connected');
 
     const adminEmail = 'victorfem7@gmail.com';
