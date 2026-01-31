@@ -26,18 +26,28 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle token expiration (don't redirect if this 401 was from a login attempt)
+// Handle 401: don't redirect on login failure (stay on page to show "Invalid credentials")
+// When redirecting, keep admin flow on /admin/login, never send to user /login
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginRequest = error.config?.url?.includes('/auth/login');
-    if (error.response?.status === 401 && !isLoginRequest) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // If user was on admin area, send to admin login; otherwise user login
-      const onAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
-      window.location.href = onAdmin ? '/admin/login' : '/login';
-    }
+    if (error.response?.status !== 401) return Promise.reject(error);
+
+    const config = error.config;
+    const requestUrl = (config?.baseURL ?? '') + (config?.url ?? '');
+    const isLoginRequest = requestUrl.includes('auth/login');
+    const isAdminRequest = requestUrl.includes('/admin');
+    const onAdminPage =
+      typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
+    // 401 from login attempt: do nothing (no redirect, no clear) so the form shows "Invalid credentials"
+    if (isLoginRequest) return Promise.reject(error);
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Never send admin flow to user /login – always use /admin/login
+    const goToAdminLogin = onAdminPage || isAdminRequest;
+    window.location.href = goToAdminLogin ? '/admin/login' : '/login';
     return Promise.reject(error);
   }
 );
