@@ -1,7 +1,10 @@
 import axios from 'axios';
 
-// Same server (root server on 3000): use /api. Separate backend (5000): set NEXT_PUBLIC_API_URL=http://localhost:5000/api
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? '' : 'http://localhost:3000') + '/api';
+// Production (Vercel): set NEXT_PUBLIC_API_URL to your backend URL (e.g. https://api.sieger.it.com/api).
+// Local: same server (server.js) serves both frontend and API on port 3000, so /api is used.
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' ? '' : 'http://localhost:3000') + '/api';
 
 const api = axios.create({
   baseURL: API_URL,

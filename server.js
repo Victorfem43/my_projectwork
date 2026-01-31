@@ -164,15 +164,11 @@ connectDB().then(() => {
     });
   });
 
-  // Handle all non-API routes with Next.js (must be last)
-  // Use a single middleware that checks the path
+  // Catch-all: send every non-API request to the frontend (same idea as app.get(/.*/, (req, res) => res.sendFile('index.html')) but for Next.js)
   expressApp.use((req, res) => {
-    // Only handle non-API routes with Next.js
     if (!req.path.startsWith('/api/')) {
       return handle(req, res);
     }
-    // API routes should have been handled by Express routes above
-    // If we reach here, the 404 handler above should have caught it
   });
 
   expressApp.listen(port, (err) => {

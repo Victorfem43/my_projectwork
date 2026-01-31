@@ -7,13 +7,14 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express();
+const port = parseInt(process.env.PORT || '5000', 10);
 
-// Middleware
 app.use(cors());
 
-// Stripe webhook must receive raw body for signature verification
+// Webhooks need raw body (before express.json())
 const paymentRoutes = require('./routes/payments');
 app.use('/api/payments/webhook', express.raw({ type: 'application/json' }), paymentRoutes.handleWebhook);
+app.use('/api/payments/webhook/crypto', express.raw({ type: 'application/json' }), paymentRoutes.handleCryptoWebhook);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,12 +27,39 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vickyexchange', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB Connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+const connectDB = async () => {
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/vickyexchange';
+  if (process.env.NODE_ENV === 'production' && uri.includes('localhost')) {
+    console.error('❌ In production you must set MONGODB_URI to a cloud database (e.g. MongoDB Atlas).');
+    console.error('   Add MONGODB_URI in Railway Variables with your Atlas connection string.');
+    process.exit(1);
+  }
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 10000, socketTimeoutMS: 45000 });
+  console.log('✅ MongoDB Connected');
+};
+
+// Health (no DB required)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'VICKYEXCHANGE API',
+    dbConnected: mongoose.connection.readyState === 1,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.post('/api/test', (req, res) => {
+  res.json({ success: true, message: 'API is running' });
+});
+
+// Require DB for other API routes
+app.use('/api', (req, res, next) => {
+  if (req.path === '/health' || req.path === '/test') return next();
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({ success: false, message: 'Database unavailable' });
+  }
+  next();
+});
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -43,12 +71,18 @@ app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/payments', paymentRoutes.router);
 app.use('/api/admin', require('./routes/admin'));
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'VICKYEXCHANGE API is running' });
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, message: 'API route not found', path: req.path });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+connectDB()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`🚀 API server running on port ${port}`);
+      console.log(`📡 API base: http://localhost:${port}/api`);
+    });
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB connection failed:', err.message);
+    process.exit(1);
+  });
