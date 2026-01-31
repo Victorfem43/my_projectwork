@@ -1,10 +1,14 @@
 import axios from 'axios';
 
-// Production (Vercel): set NEXT_PUBLIC_API_URL to your backend URL (e.g. https://api.sieger.it.com/api).
-// Local: same server (server.js) serves both frontend and API on port 3000, so /api is used.
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' ? '' : 'http://localhost:3000') + '/api';
+// Production (Vercel): set NEXT_PUBLIC_API_URL to full URL, e.g. https://myprojectwork-production.up.railway.app/api
+// Must start with https:// or http:// so the browser does not treat it as a relative path.
+const raw = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+const API_URL = (() => {
+  if (!raw) return (typeof window !== 'undefined' ? '' : 'http://localhost:3000') + '/api';
+  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw.replace(/\/$/, '');
+  // If they forgot the protocol, prepend https:// so it's not treated as a relative path
+  return 'https://' + raw.replace(/\/$/, '');
+})();
 
 const api = axios.create({
   baseURL: API_URL,
