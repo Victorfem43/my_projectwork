@@ -6,6 +6,7 @@ import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 import { User, Shield, Bell } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -104,7 +105,7 @@ export default function SettingsPage() {
                     </div>
                     <button className="btn-secondary">Enable</button>
                   </div>
-                  <div className="flex items-center justify-between p-4 glass rounded-lg">
+                  <div className="flex items-center justify-between p-4 glass rounded-lg flex-wrap gap-3">
                     <div>
                       <p className="font-semibold">KYC Status</p>
                       <p className="text-gray-400 text-sm">
@@ -116,6 +117,12 @@ export default function SettingsPage() {
                         </span>
                       </p>
                     </div>
+                    <Link
+                      href="/kyc"
+                      className="btn-secondary text-sm py-2 px-4"
+                    >
+                      {user?.kycStatus === 'approved' ? 'View KYC' : 'Complete KYC'}
+                    </Link>
                   </div>
                 </div>
               </div>

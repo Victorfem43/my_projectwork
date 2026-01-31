@@ -34,6 +34,13 @@ const userSchema = new mongoose.Schema({
     enum: ['pending', 'approved', 'rejected'],
     default: 'pending'
   },
+  kycFullName: { type: String, trim: true },
+  kycDateOfBirth: { type: Date },
+  kycAddress: { type: String, trim: true },
+  kycIdType: { type: String, trim: true },
+  kycIdNumber: { type: String, trim: true },
+  kycDocumentUrl: { type: String, trim: true },
+  kycSubmittedAt: { type: Date },
   isBlocked: {
     type: Boolean,
     default: false
