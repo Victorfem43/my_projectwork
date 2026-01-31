@@ -30,15 +30,16 @@ router.post('/register', [
     }
 
     const { name, email, password } = req.body;
+    const emailNormalized = (email || '').trim().toLowerCase();
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: emailNormalized });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
     // Create user
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email: emailNormalized, password });
 
     // Create wallet for user
     await Wallet.create({ user: user._id });
@@ -85,9 +86,10 @@ router.post('/login', [
     }
 
     const { email, password } = req.body;
+    const emailNormalized = (email || '').trim().toLowerCase();
 
     // Check if user exists and get password
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email: emailNormalized }).select('+password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -149,7 +151,8 @@ router.post('/forgot-password', [
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const user = await User.findOne({ email: req.body.email });
+    const emailNormalized = (req.body.email || '').trim().toLowerCase();
+    const user = await User.findOne({ email: emailNormalized });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
