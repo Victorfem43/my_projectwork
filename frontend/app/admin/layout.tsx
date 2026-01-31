@@ -18,14 +18,15 @@ export default function AdminLayout({
       return;
     }
 
-    // Check authentication and admin status
+    // Not logged in → admin login (stay in admin flow)
     if (!isAuthenticated()) {
       router.push('/admin/login');
       return;
     }
 
+    // Logged in but not admin → admin login with message (do not send to user dashboard)
     if (!isAdmin()) {
-      router.push('/dashboard');
+      router.push('/admin/login?reason=admin_required');
       return;
     }
   }, [router, pathname]);

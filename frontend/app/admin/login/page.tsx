@@ -1,20 +1,31 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { setAuth } from '@/lib/auth';
+import { setAuth, clearAuth, isAdmin } from '@/lib/auth';
 import toast from 'react-hot-toast';
 import { ArrowRight, Mail, Lock, Shield } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
+
+  // If redirected here because current user is not admin, show message and clear session so admin can sign in
+  useEffect(() => {
+    if (searchParams.get('reason') === 'admin_required') {
+      if (isAdmin()) return; // already admin, no need to clear
+      clearAuth();
+      toast('Please sign in with an admin account.', { icon: '🔐' });
+      router.replace('/admin/login', { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +42,16 @@ export default function AdminLoginPage() {
       toast.success('Admin login successful!');
       router.push('/admin');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      const message = error.response?.data?.message || 'Login failed';
+      toast.error(message);
+      // Log for debugging (Network tab + Console) – helps with deployment issues
+      console.error('[Admin login]', {
+        status: error.response?.status,
+        message,
+        apiBase: error.config?.baseURL,
+        url: error.config?.url,
+        response: error.response?.data,
+      });
       setLoading(false);
     }
   };
