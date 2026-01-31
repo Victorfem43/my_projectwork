@@ -34,7 +34,9 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      // If user was on admin area, send to admin login; otherwise user login
+      const onAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+      window.location.href = onAdmin ? '/admin/login' : '/login';
     }
     return Promise.reject(error);
   }
