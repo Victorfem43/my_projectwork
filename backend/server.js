@@ -76,6 +76,52 @@ app.use('/api/transactions', require('./routes/transactions'));
 app.use('/api/payments', paymentRoutes.router);
 app.use('/api/admin', require('./routes/admin'));
 
+// One-time admin creation from Railway (when your machine can't reach MongoDB)
+// Set CREATE_ADMIN_SECRET in Railway, then: POST /api/setup/create-admin with body { "secret": "your-secret" }
+app.post('/api/setup/create-admin', async (req, res) => {
+  const secret = process.env.CREATE_ADMIN_SECRET;
+  if (!secret || secret !== (req.body?.secret || req.headers['x-setup-secret'])) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  try {
+    const User = require('./models/User');
+    const Wallet = require('./models/Wallet');
+    const adminEmail = 'victorfem7@gmail.com';
+    const adminPassword = '20262026';
+    const adminName = 'Admin';
+    const emailNorm = adminEmail.trim().toLowerCase();
+    let admin = await User.findOne({ email: emailNorm });
+    if (admin) {
+      admin.name = adminName;
+      admin.password = adminPassword;
+      admin.role = 'admin';
+      admin.isVerified = true;
+      admin.isBlocked = false;
+      await admin.save();
+    } else {
+      admin = await User.create({
+        name: adminName,
+        email: emailNorm,
+        password: adminPassword,
+        role: 'admin',
+        isVerified: true,
+        isBlocked: false,
+      });
+      const walletExists = await Wallet.findOne({ user: admin._id });
+      if (!walletExists) await Wallet.create({ user: admin._id });
+    }
+    res.json({
+      success: true,
+      message: 'Admin created or updated',
+      email: adminEmail,
+      hint: 'Log in at /admin/login with the credentials from create-admin.js',
+    });
+  } catch (err) {
+    console.error('Setup create-admin error:', err);
+    res.status(500).json({ success: false, message: err.message || 'Setup failed' });
+  }
+});
+
 app.use('/api', (req, res) => {
   res.status(404).json({ success: false, message: 'API route not found', path: req.path });
 });
