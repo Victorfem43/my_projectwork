@@ -111,9 +111,12 @@ export default function SettingsPage() {
                       <p className="text-gray-400 text-sm">
                         Status: <span className={`${
                           user?.kycStatus === 'approved' ? 'text-green-400' :
-                          user?.kycStatus === 'rejected' ? 'text-red-400' : 'text-yellow-400'
+                          user?.kycStatus === 'rejected' ? 'text-red-400' :
+                          user?.kycStatus === 'pending' && user?.kycSubmittedAt ? 'text-yellow-400' : 'text-gray-400'
                         }`}>
-                          {user?.kycStatus || 'pending'}
+                          {user?.kycStatus === 'approved' ? 'approved' :
+                           user?.kycStatus === 'rejected' ? 'rejected' :
+                           user?.kycStatus === 'pending' && user?.kycSubmittedAt ? 'Under review' : 'Not verified'}
                         </span>
                       </p>
                     </div>

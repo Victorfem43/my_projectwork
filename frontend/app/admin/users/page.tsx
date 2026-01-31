@@ -94,9 +94,13 @@ export default function AdminUsersPage() {
                           <span className={`px-2 py-1 rounded text-xs ${
                             user.kycStatus === 'approved' ? 'bg-green-500/20 text-green-400' :
                             user.kycStatus === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                            'bg-yellow-500/20 text-yellow-400'
+                            user.kycStatus === 'pending' && user.kycSubmittedAt ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-gray-500/20 text-gray-400'
                           }`}>
-                            {user.kycStatus}
+                            {user.kycStatus === 'approved' ? 'Approved' :
+                             user.kycStatus === 'rejected' ? 'Rejected' :
+                             user.kycStatus === 'pending' && user.kycSubmittedAt ? 'Under review' :
+                             'Not submitted'}
                           </span>
                         </td>
                         <td className="py-3 px-4">

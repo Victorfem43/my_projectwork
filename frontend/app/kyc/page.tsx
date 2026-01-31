@@ -99,7 +99,7 @@ export default function KYCPage() {
   }
 
   const isApproved = user?.kycStatus === 'approved';
-  const isPending = user?.kycStatus === 'pending';
+  const isPending = user?.kycStatus === 'pending' && !!user?.kycSubmittedAt;
   const canSubmit = !isApproved;
 
   return (
@@ -142,10 +142,9 @@ export default function KYCPage() {
               </div>
               <p className="text-gray-400 text-sm">
                 {isApproved && 'Your identity has been verified. You have full access to the platform.'}
-                {isPending && user?.kycSubmittedAt && (
+                {isPending && (
                   <>Submitted on {new Date(user.kycSubmittedAt).toLocaleDateString()}. We will notify you once reviewed.</>
                 )}
-                {isPending && !user?.kycSubmittedAt && 'Your submission is being reviewed.'}
                 {!isApproved && !isPending && 'Complete the form below to submit your verification.'}
               </p>
             </div>
