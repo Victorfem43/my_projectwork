@@ -6,7 +6,7 @@ import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Wallet, ArrowUp, ArrowDown, CreditCard, Banknote, Coins, Copy, Check } from 'lucide-react';
+import { Wallet, ArrowUp, ArrowDown, CreditCard, Coins, Copy, Check } from 'lucide-react';
 import CryptoIcon from '@/components/CryptoIcon';
 
 export default function WalletPage() {
@@ -15,7 +15,7 @@ export default function WalletPage() {
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [depositLoading, setDepositLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'crypto'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'crypto'>('stripe');
   const [depositCurrency, setDepositCurrency] = useState<'usd' | 'btc' | 'eth' | 'usdt'>('usd');
   const [formData, setFormData] = useState({
     amount: '',
@@ -64,26 +64,14 @@ export default function WalletPage() {
     });
   }, [paymentMethod, showDeposit]);
 
-  // Show success/cancel toast when returning from payment provider; capture PayPal if token present
+  // Show success/cancel toast when returning from payment provider
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
-    const provider = params.get('provider');
-    const token = params.get('token');
     if (payment === 'cancelled') {
       toast.error('Payment was cancelled.');
       window.history.replaceState({}, '', '/wallet');
-      return;
-    }
-    if (payment === 'success' && provider === 'paypal' && token) {
-      api.post('/payments/capture-paypal', { orderId: token })
-        .then(() => {
-          toast.success('Payment successful. Your wallet has been credited.');
-          window.history.replaceState({}, '', '/wallet');
-          fetchWallet();
-        })
-        .catch((err: any) => toast.error(err.response?.data?.message || 'Failed to capture payment'));
       return;
     }
     if (payment === 'success') {
@@ -122,10 +110,7 @@ export default function WalletPage() {
     try {
       let endpoint = '/payments/create-checkout-session';
       let body: Record<string, unknown> = { successUrl, cancelUrl };
-      if (paymentMethod === 'paypal') {
-        endpoint = '/payments/create-paypal-order';
-        body.amount = amount;
-      } else if (paymentMethod === 'crypto') {
+      if (paymentMethod === 'crypto') {
         endpoint = '/payments/create-crypto-charge';
         if (depositCurrency === 'usd') {
           body.amount = amount;
@@ -326,7 +311,7 @@ export default function WalletPage() {
                     <p className="text-gray-400 text-sm">
                       {paymentMethod === 'crypto'
                         ? 'Deposit in USD or crypto (BTC, ETH, USDT ERC20). Minimum 1 USD equivalent.'
-                        : 'Card and PayPal are in USD. Minimum 1 USD.'}
+                        : 'Card is in USD. Minimum 1 USD.'}
                     </p>
                     <div>
                       <label className="block text-sm font-medium mb-2">Payment method</label>
@@ -339,15 +324,6 @@ export default function WalletPage() {
                           }`}
                         >
                           <CreditCard className="w-4 h-4" /> Card
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => { setPaymentMethod('paypal'); setDepositCurrency('usd'); }}
-                          className={`flex-1 min-w-[100px] py-2 px-3 rounded-lg border flex items-center justify-center gap-2 transition ${
-                            paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/20 hover:border-white/40'
-                          }`}
-                        >
-                          <Banknote className="w-4 h-4" /> PayPal
                         </button>
                         <button
                           type="button"
@@ -410,11 +386,9 @@ export default function WalletPage() {
                           ? 'Redirecting…'
                           : paymentMethod === 'stripe'
                             ? 'Pay with card'
-                            : paymentMethod === 'paypal'
-                              ? 'Pay with PayPal'
-                              : depositCurrency === 'usd'
-                                ? 'Pay with crypto (USD)'
-                                : `Deposit ${depositCurrency.toUpperCase()}`}
+                            : depositCurrency === 'usd'
+                              ? 'Pay with crypto (USD)'
+                              : `Deposit ${depositCurrency.toUpperCase()}`}
                       </button>
                       <button
                         type="button"

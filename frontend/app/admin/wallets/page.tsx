@@ -6,7 +6,7 @@ import AdminNavbar from '@/components/Layout/AdminNavbar';
 import Footer from '@/components/Layout/Footer';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Wallet, Plus, CreditCard, Banknote, Coins } from 'lucide-react';
+import { Wallet, Plus, CreditCard, Coins } from 'lucide-react';
 
 export default function AdminWalletsPage() {
   const [wallets, setWallets] = useState<any[]>([]);
@@ -14,7 +14,7 @@ export default function AdminWalletsPage() {
   const [showFundModal, setShowFundModal] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<any>(null);
   const [fundLoading, setFundLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'paypal' | 'crypto'>('stripe');
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'crypto'>('stripe');
   const [formData, setFormData] = useState({
     amount: '',
     currency: 'usd',
@@ -50,26 +50,14 @@ export default function AdminWalletsPage() {
     }
   };
 
-  // Show success/cancel toast when returning; capture PayPal if token present
+  // Show success/cancel toast when returning from payment provider
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
-    const provider = params.get('provider');
-    const token = params.get('token');
     if (payment === 'cancelled') {
       toast.error('Payment was cancelled.');
       window.history.replaceState({}, '', '/admin/wallets');
-      return;
-    }
-    if (payment === 'success' && provider === 'paypal' && token) {
-      api.post('/payments/capture-paypal', { orderId: token })
-        .then(() => {
-          toast.success('Payment successful. User wallet has been credited.');
-          window.history.replaceState({}, '', '/admin/wallets');
-          fetchWallets();
-        })
-        .catch((err: any) => toast.error(err.response?.data?.message || 'Failed to capture payment'));
       return;
     }
     if (payment === 'success') {
@@ -104,8 +92,7 @@ export default function AdminWalletsPage() {
     try {
       let endpoint = '/payments/create-admin-checkout-session';
       const body = { userId: selectedWallet.user._id, amount, successUrl, cancelUrl };
-      if (paymentMethod === 'paypal') endpoint = '/payments/create-admin-paypal-order';
-      else if (paymentMethod === 'crypto') endpoint = '/payments/create-admin-crypto-charge';
+      if (paymentMethod === 'crypto') endpoint = '/payments/create-admin-crypto-charge';
       const res = await api.post(endpoint, body);
       const url = res.data?.url;
       if (url) {
@@ -257,15 +244,6 @@ export default function AdminWalletsPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod('paypal')}
-                      className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg border flex items-center justify-center gap-2 transition ${
-                        paymentMethod === 'paypal' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/20 hover:border-white/40'
-                      }`}
-                    >
-                      <Banknote className="w-4 h-4" /> PayPal
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => setPaymentMethod('crypto')}
                       className={`flex-1 min-w-[80px] py-2 px-3 rounded-lg border flex items-center justify-center gap-2 transition ${
                         paymentMethod === 'crypto' ? 'border-blue-500 bg-blue-500/20 text-blue-400' : 'border-white/20 hover:border-white/40'
@@ -290,7 +268,7 @@ export default function AdminWalletsPage() {
                 </div>
                 <div className="flex gap-3">
                   <button type="submit" className="btn-primary flex-1" disabled={fundLoading}>
-                    {fundLoading ? 'Redirecting…' : paymentMethod === 'stripe' ? 'Pay with card' : paymentMethod === 'paypal' ? 'Pay with PayPal' : 'Pay with crypto'}
+                    {fundLoading ? 'Redirecting…' : paymentMethod === 'stripe' ? 'Pay with card' : 'Pay with crypto'}
                   </button>
                   <button
                     type="button"
