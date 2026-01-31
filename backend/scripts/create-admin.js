@@ -1,14 +1,22 @@
+const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const User = require('../models/User');
 const Wallet = require('../models/Wallet');
 
+// Load backend/.env so MONGODB_URI matches what Railway uses (run from repo root or backend/)
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const createAdmin = async () => {
+  const uri = process.env.MONGODB_URI || 'mongodb+srv://victorfem7_db_user:Victorfem21@cluster0.vhldqzk.mongodb.net/siegertech?appName=Cluster0';
+  if (!process.env.MONGODB_URI) {
+    console.warn('⚠️  No MONGODB_URI in env – using local default. For production, set MONGODB_URI to the SAME value as Railway.');
+  }
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://victorfem7_db_user:Victorfem21@cluster0.vhldqzk.mongodb.net/?appName=Cluster0');
-    console.log('✅ MongoDB Connected');
+    await mongoose.connect(uri);
+    const dbName = mongoose.connection.db?.databaseName || 'unknown';
+    console.log('✅ MongoDB Connected (database:', dbName + ')');
 
     const adminEmail = 'victorfem7@gmail.com';
     const adminPassword = '20262026';
@@ -30,7 +38,7 @@ const createAdmin = async () => {
       // Create new admin
       admin = await User.create({
         name: adminName,
-        email: adminEmail,
+        email: adminEmailNormalized,
         password: adminPassword, // Will be hashed by pre-save hook
         role: 'admin',
         isVerified: true,

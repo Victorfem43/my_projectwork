@@ -38,12 +38,17 @@ const connectDB = async () => {
   console.log('✅ MongoDB Connected');
 };
 
-// Health (no DB required)
+// Health – includes database name so you can confirm what Railway is using
 app.get('/api/health', (req, res) => {
+  const dbConnected = mongoose.connection.readyState === 1;
+  const databaseName = dbConnected && mongoose.connection.db
+    ? mongoose.connection.db.databaseName
+    : null;
   res.json({
     status: 'OK',
     message: 'VICKYEXCHANGE API',
-    dbConnected: mongoose.connection.readyState === 1,
+    dbConnected,
+    databaseName,
     timestamp: new Date().toISOString(),
   });
 });

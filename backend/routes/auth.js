@@ -91,12 +91,18 @@ router.post('/login', [
     // Check if user exists and get password
     const user = await User.findOne({ email: emailNormalized }).select('+password');
     if (!user) {
+      if (process.env.DEBUG_LOGIN === '1') {
+        console.log('[DEBUG_LOGIN] User not found for email:', emailNormalized);
+      }
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
     // Check if password matches
     const isMatch = await user.matchPassword(password);
     if (!isMatch) {
+      if (process.env.DEBUG_LOGIN === '1') {
+        console.log('[DEBUG_LOGIN] Wrong password for user:', user.email);
+      }
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
