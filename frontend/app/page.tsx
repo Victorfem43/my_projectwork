@@ -1,6 +1,8 @@
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/Layout/Navbar';
-import Footer from '@/components/Layout/Footer';
 import Link from 'next/link';
+
+const Footer = dynamic(() => import('@/components/Layout/Footer'), { ssr: true });
 import { ArrowRight, Shield, Zap, Globe, TrendingUp, Gift, Lock, CheckCircle, Star, Users, BarChart3 } from 'lucide-react';
 import CryptoIcon from '@/components/CryptoIcon';
 import GiftCardIcon from '@/components/GiftCardIcon';

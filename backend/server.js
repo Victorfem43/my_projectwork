@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
 
@@ -10,6 +11,7 @@ const app = express();
 const port = parseInt(process.env.PORT || '5000', 10);
 
 app.use(cors());
+app.use(compression());
 
 // Webhooks need raw body (before express.json())
 const paymentRoutes = require('./routes/payments');

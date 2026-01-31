@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Layout/Navbar';
 import Footer from '@/components/Layout/Footer';
@@ -8,7 +9,16 @@ import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import CryptoIcon from '@/components/CryptoIcon';
-import CandlestickChart, { type OHLC } from '@/components/CandlestickChart';
+import type { OHLC } from '@/components/CandlestickChart';
+
+const CandlestickChart = dynamic(() => import('@/components/CandlestickChart'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full rounded-lg bg-white/5 flex items-center justify-center" style={{ height: 320 }}>
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
+    </div>
+  ),
+});
 
 // Mini 7d sparkline from CoinGecko data
 function MiniSparkline({ data, up }: { data: number[] | null; up: boolean }) {
